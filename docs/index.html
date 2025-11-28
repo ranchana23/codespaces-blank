@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Remove Image Corners — Static</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai+Looped:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    /* Minimal pastel UI (keeps similar look to app) */
+    :root{--bg:#fbfbfc;--card:#fff;--muted:#64748b;--accent:#cfe8ff;--border:#eef3f7}
+    html,body{height:100%}
+    body{font-family:'Noto Sans Thai Looped', 'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, "Helvetica Neue", Arial; background:var(--bg); color:#1f2937; margin:0; display:flex; align-items:center; justify-content:center; padding:28px}
+    .card{background:var(--card); width:100%; max-width:900px; border-radius:12px; padding:28px; box-shadow:0 6px 18px rgba(31,41,55,0.06); border:1px solid var(--border)}
+    h1{font-size:20px;margin:0 0 6px}
+    p.subtitle{margin:0 0 18px;color:var(--muted);font-size:13px}
+    .row{display:flex;gap:12px;align-items:center}
+    .upload{border:2px dashed #e6eef6;border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:#fff}
+    .upload:hover{box-shadow:0 8px 22px rgba(31,41,55,0.04)}
+    input[type=file]{display:none}
+    .controls{display:flex;gap:12px;align-items:center;margin-top:12px}
+    input[type=text]{padding:10px;border-radius:8px;border:1px solid #e6edf3;background:#fbfdff}
+    button{padding:10px 14px;border-radius:8px;border:1px solid #c6dff8;background:var(--accent);cursor:pointer;font-weight:600}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .file-info{margin-top:10px;padding:10px;border-radius:8px;background:#fbfbfc;border:1px solid var(--border);color:#55646f}
+    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:14px}
+    .thumb{background:#fff;border:1px solid #eef3f7;padding:8px;border-radius:8px;text-align:center}
+    .thumb img{max-width:100%;height:100px;object-fit:contain;border-radius:6px}
+    .meta{font-size:12px;color:#516171;margin-top:6px}
+    .actions{display:flex;gap:8px;justify-content:center;margin-top:12px}
+    .note{font-size:12px;color:#718096;margin-top:8px;text-align:center}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Remove Image Corners</h1>
+    <p class="subtitle">อัปโหลดรูปหลายภาพ กำหนดมุมโค้ง แล้วดูตัวอย่าง — ทั้งหมดทำในเบราว์เซอร์ (ไม่มีเซิร์ฟเวอร์)</p>
+
+    <div class="upload" id="uploadArea">
+      <div style="font-size:28px">📁</div>
+      <div style="margin-top:8px">คลิกหรือลากไฟล์มาวางที่นี่</div>
+      <div style="margin-top:6px;font-size:12px;color:#94a3b8">รองรับ JPG, PNG, GIF, WEBP</div>
+    </div>
+    <input id="fileInput" type="file" accept="image/*" multiple>
+
+    <div class="controls">
+      <input id="radius" type="text" value="10%" style="width:120px" placeholder="เช่น 20 หรือ 12%">
+      <button id="previewBtn" disabled>Preview</button>
+      <button id="downloadAll" disabled>ดาวน์โหลดทั้งหมด (ZIP)</button>
+      <button id="resetBtn">รีเซ็ต</button>
+    </div>
+
+    <div id="fileInfo" class="file-info" style="display:none"></div>
+
+    <div id="gallery" class="gallery" aria-live="polite"></div>
+    <div class="note">หมายเหตุ: การดาวน์โหลดทั้งหมดจะสร้างไฟล์ ZIP ภายในเบราว์เซอร์</div>
+  </main>
+
+<script>
+// Utility: apply rounded corners using canvas and return PNG dataURL
+function applyRoundedCornersToImage(img, radius){
+  const w = img.width, h = img.height;
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  // draw rounded rect path
+  ctx.clearRect(0,0,w,h);
+  ctx.save();
+  const r = radius;
+  ctx.beginPath();
+  ctx.moveTo(r,0);
+  ctx.arcTo(w,0,w,r,r);
+  ctx.arcTo(w,h,w-r,h,r);
+  ctx.arcTo(0,h,0,h-r,r);
+  ctx.arcTo(0,0,r,0,r);
+  ctx.closePath();
+  ctx.clip();
+  ctx.drawImage(img,0,0,w,h);
+  ctx.restore();
+  return canvas.toDataURL('image/png');
+}
+
+function parseRadius(radiusStr, w, h){
+  if(!radiusStr) return Math.floor(Math.min(w,h)*0.1);
+  radiusStr = radiusStr.toString().trim();
+  if(radiusStr.endsWith('%')){
+    const p = parseFloat(radiusStr.slice(0,-1));
+    if(isNaN(p)) return Math.floor(Math.min(w,h)*0.1);
+    return Math.round(Math.min(w,h)*(p/100));
+  }
+  const v = parseInt(radiusStr,10);
+  return isNaN(v)?Math.floor(Math.min(w,h)*0.1):v;
+}
+
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const previewBtn = document.getElementById('previewBtn');
+const downloadAll = document.getElementById('downloadAll');
+const resetBtn = document.getElementById('resetBtn');
+const radiusInput = document.getElementById('radius');
+const fileInfo = document.getElementById('fileInfo');
+const gallery = document.getElementById('gallery');
+
+let files = [];
+let processed = []; // {filename, dataUrl}
+
+uploadArea.addEventListener('click', ()=> fileInput.click());
+uploadArea.addEventListener('dragover', e=>{ e.preventDefault(); uploadArea.style.boxShadow='0 8px 22px rgba(31,41,55,0.04)';});
+uploadArea.addEventListener('dragleave', e=>{ uploadArea.style.boxShadow='';});
+uploadArea.addEventListener('drop', e=>{ e.preventDefault(); uploadArea.style.boxShadow=''; const list = e.dataTransfer.files; handleFiles(list); });
+fileInput.addEventListener('change', e=> handleFiles(e.target.files));
+
+function handleFiles(list){
+  const arr = Array.from(list).filter(f=>f.type && f.type.startsWith('image'));
+  if(arr.length===0){ alert('กรุณาเลือกไฟล์รูปภาพ'); return; }
+  files = arr;
+  fileInfo.style.display='block';
+  const totalKB = (files.reduce((s,f)=>s+f.size,0)/1024).toFixed(2);
+  fileInfo.textContent = `ไฟล์: ${files.length} รายการ — ขนาดรวม ${totalKB} KB`;
+  previewBtn.disabled = false;
+  downloadAll.disabled = true;
+  gallery.innerHTML = '';
+}
+
+previewBtn.addEventListener('click', async ()=>{
+  if(files.length===0) return;
+  previewBtn.disabled = true; downloadAll.disabled = true; gallery.innerHTML=''; processed=[];
+  for(const f of files){
+    try{
+      const data = await readFileAsDataURL(f);
+      const img = await loadImage(data);
+      const rad = parseRadius(radiusInput.value, img.width, img.height);
+      const resultDataUrl = applyRoundedCornersToImage(img, rad);
+      processed.push({filename: nameSafe(f.name), dataUrl: resultDataUrl});
+      addThumb(resultDataUrl, f.name);
+    }catch(err){
+      console.error('process err', err);
+    }
+  }
+  previewBtn.disabled = false; downloadAll.disabled = processed.length===0;
+});
+
+function nameSafe(name){ return name.replace(/\s+/g,'_'); }
+
+function addThumb(dataUrl, filename){
+  const d = document.createElement('div'); d.className='thumb';
+  const img = document.createElement('img'); img.src = dataUrl; d.appendChild(img);
+  const meta = document.createElement('div'); meta.className='meta'; meta.textContent = filename; d.appendChild(meta);
+  const btn = document.createElement('button'); btn.textContent='ดาวน์โหลด'; btn.style.marginTop='8px';
+  btn.onclick = ()=> downloadDataUrl(dataUrl, filename.replace(/\.\w+$/,'')+'_rounded.png');
+  d.appendChild(btn);
+  gallery.appendChild(d);
+}
+
+function downloadDataUrl(dataUrl, filename){
+  const a = document.createElement('a'); a.href = dataUrl; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+}
+
+function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
+function loadImage(dataUrl){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=dataUrl; }); }
+
+// Download all using JSZip
+downloadAll.addEventListener('click', async ()=>{
+  if(!processed || processed.length===0) return;
+  downloadAll.disabled = true;
+  try{
+    const zip = new JSZip();
+    for(const item of processed){
+      // convert base64 dataURL -> binary
+      const parts = item.dataUrl.split(',');
+      const mime = parts[0].match(/:(.*?);/)[1];
+      const binStr = atob(parts[1]);
+      const len = binStr.length; const arr = new Uint8Array(len);
+      for(let i=0;i<len;i++) arr[i]=binStr.charCodeAt(i);
+      zip.file(item.filename.replace(/\.(jpg|jpeg|png|gif)$/i,'') + '_rounded.png', arr);
+    }
+    const blob = await zip.generateAsync({type:'blob'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'images_rounded.zip'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }catch(err){ console.error(err); alert('เกิดข้อผิดพลาดในการสร้าง ZIP'); }
+  finally{ downloadAll.disabled = false; }
+});
+
+resetBtn.addEventListener('click', ()=>{ files=[]; processed=[]; gallery.innerHTML=''; fileInfo.style.display='none'; previewBtn.disabled=true; downloadAll.disabled=true; fileInput.value=''; });
+
+</script>
+</body>
+</html>
