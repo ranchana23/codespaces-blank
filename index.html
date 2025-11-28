@@ -10,25 +10,58 @@
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <style>
     :root {
+      /* Default Theme: Pastel Dreams (Pink/Blue) */
       --bg: #FDFBF7;
       --card: #FFFFFF;
-      --text: #4A4A4A;
-      --muted: #8898AA;
+      --text: #2D3748;
+      --muted: #4A5568;
       --primary: #AEC6CF;
-      /* Pastel Blue */
       --primary-hover: #9AB5BF;
       --secondary: #FFB7B2;
-      /* Pastel Pink */
       --secondary-hover: #EFA6A1;
       --border: #F0F0F0;
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    }
+
+    /* Theme 2: Lavender Garden */
+    [data-theme="lavender"] {
+      --bg: #F8F6FB;
+      --primary: #D4C5E2;
+      --primary-hover: #C0B0D0;
+      --secondary: #E6B8E8;
+      --secondary-hover: #D4A6D6;
+      --border: #F0E6F6;
+    }
+
+    /* Theme 3: Mint Peach */
+    [data-theme="mint"] {
+      --bg: #F6FBF9;
+      --primary: #B8E6D5;
+      --primary-hover: #A4D4C3;
+      --secondary: #FFD4B8;
+      --secondary-hover: #F5C5A6;
+      --border: #E6F6F0;
+    }
+
+    /* Smooth theme transitions */
+    body {
+      transition: background-color 0.3s ease;
+    }
+
+    .card,
+    .sidebar,
+    .btn,
+    .nav-item,
+    .upload-area,
+    .controls {
+      transition: all 0.3s ease;
     }
 
     html,
     body {
       height: 100%;
       margin: 0;
-      font-family: 'Noto Sans Thai Looped', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Noto Sans Thai Looped', sans-serif;
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
@@ -111,6 +144,73 @@
       display: block;
     }
 
+    /* Theme Selector Styles */
+    .theme-selector {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .theme-selector-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .theme-options {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .theme-option {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .theme-option:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .theme-option.active {
+      border-color: var(--text);
+      box-shadow: 0 0 0 2px white, 0 0 0 4px var(--text);
+    }
+
+    .theme-option.active::after {
+      content: '✓';
+      position: absolute;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Theme color swatches */
+    .theme-pastel {
+      background: linear-gradient(135deg, #AEC6CF 0%, #FFB7B2 100%);
+    }
+
+    .theme-lavender {
+      background: linear-gradient(135deg, #D4C5E2 0%, #E6B8E8 100%);
+    }
+
+    .theme-mint {
+      background: linear-gradient(135deg, #B8E6D5 0%, #FFD4B8 100%);
+    }
+
     .wrap {
       max-width: 900px;
       margin: 40px auto;
@@ -175,19 +275,20 @@
 
     .btn {
       background: var(--primary);
-      color: #fff;
+      color: var(--text);
       padding: 10px 20px;
       border-radius: 12px;
       border: 0;
       cursor: pointer;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       transition: all 0.2s ease;
       box-shadow: 0 4px 12px rgba(174, 198, 207, 0.3);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      font-family: 'Noto Sans Thai Looped', sans-serif;
     }
 
     .btn:hover {
@@ -273,6 +374,7 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 8px 12px;
+      font-family: 'Noto Sans Thai Looped', sans-serif;
       width: 80px;
       font-family: inherit;
       color: var(--text);
@@ -333,6 +435,16 @@
           <span>Auto Crop</span>
         </a>
       </nav>
+
+      <!-- Theme Selector -->
+      <div class="theme-selector">
+        <div class="theme-selector-label">Theme</div>
+        <div class="theme-options">
+          <div class="theme-option theme-pastel active" data-theme="pastel" title="Pastel Dreams"></div>
+          <div class="theme-option theme-lavender" data-theme="lavender" title="Lavender Garden"></div>
+          <div class="theme-option theme-mint" data-theme="mint" title="Mint Peach"></div>
+        </div>
+      </div>
     </aside>
 
     <!-- Main Content -->
@@ -400,6 +512,52 @@
 
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script>
+    // ============================================
+    // Theme Switching System
+    // ============================================
+
+    const themeOptions = document.querySelectorAll('.theme-option');
+
+    // Load saved theme or default to pastel
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'pastel';
+      applyTheme(savedTheme);
+    }
+
+    // Apply theme to document
+    function applyTheme(themeName) {
+      // Remove all theme classes
+      document.body.removeAttribute('data-theme');
+
+      // Add new theme if not default
+      if (themeName !== 'pastel') {
+        document.body.setAttribute('data-theme', themeName);
+      }
+
+      // Update active state on theme options
+      themeOptions.forEach(option => {
+        if (option.getAttribute('data-theme') === themeName) {
+          option.classList.add('active');
+        } else {
+          option.classList.remove('active');
+        }
+      });
+
+      // Save to localStorage
+      localStorage.setItem('theme', themeName);
+    }
+
+    // Theme option click handlers
+    themeOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        const themeName = option.getAttribute('data-theme');
+        applyTheme(themeName);
+      });
+    });
+
+    // Load theme on page load
+    loadTheme();
+
     // ============================================
     // URL Routing with History API
     // ============================================
