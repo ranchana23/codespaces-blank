@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Remove Image Corners</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai+Looped:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,22 +13,24 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Noto Sans Thai Looped', 'Noto Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #fbfbfc; /* soft neutral background */
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 28px;
+            color: #233041;
         }
-        
+
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
+            background: #ffffff; /* clean card */
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 6px 18px rgba(35, 48, 65, 0.06);
+            max-width: 760px;
             width: 100%;
+            border: 1px solid #eef3f7;
         }
         
         h1 {
@@ -37,36 +40,38 @@
         }
         
         .subtitle {
-            color: #666;
+            color: #64748b;
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 14px;
+            margin-bottom: 18px;
+            font-size: 13px;
+            font-weight: 400;
         }
         
         .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 15px;
-            padding: 40px;
+            border: 2px dashed #e6eef6;
+            border-radius: 10px;
+            padding: 28px;
             text-align: center;
-            background: #f8f9ff;
+            background: #ffffff;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
+            transition: box-shadow 0.18s ease, transform 0.12s ease;
+            margin-bottom: 18px;
         }
         
         .upload-area:hover {
-            background: #eef1ff;
-            border-color: #764ba2;
+            box-shadow: 0 6px 18px rgba(35, 48, 65, 0.04);
+            transform: translateY(-2px);
         }
         
         .upload-area.dragover {
-            background: #e0e7ff;
-            border-color: #764ba2;
+            box-shadow: 0 8px 22px rgba(35, 48, 65, 0.06);
+            border-color: #dbeafc;
         }
         
         .upload-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
+            font-size: 36px;
+            margin-bottom: 10px;
+            opacity: 0.9;
         }
         
         input[type="file"] {
@@ -86,16 +91,18 @@
         
         input[type="text"] {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
+            padding: 10px 12px;
+            border: 1px solid #e6edf3;
             border-radius: 8px;
             font-size: 14px;
-            transition: border-color 0.3s;
+            background: #fbfdff;
+            transition: box-shadow 0.12s ease, border-color 0.12s ease;
         }
         
         input[type="text"]:focus {
             outline: none;
-            border-color: #667eea;
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.06);
+            border-color: #cfe3ff;
         }
         
         .hint {
@@ -106,31 +113,33 @@
         
         button {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
+            padding: 12px 14px;
+            background: #cfe8ff; /* pastel blue */
+            color: #0f1724;
+            border: 1px solid #c6dff8;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.12s, box-shadow 0.12s;
         }
         
         button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(35, 48, 65, 0.06);
         }
         
         button:disabled {
-            background: #ccc;
+            background: #f1f5f9;
+            color: #9aa6b2;
+            border-color: #eef2f6;
             cursor: not-allowed;
         }
         
         .result-preview {
-            margin-top: 20px;
+            margin-top: 18px;
             display: none;
-            animation: fadeIn 0.5s;
+            animation: fadeIn 0.28s;
             text-align: center;
         }
 
@@ -153,12 +162,13 @@
         }
         
         .result-info {
-            background: #f8f9ff;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-size: 14px;
-            color: #666;
+            background: #fbfdff;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-size: 13px;
+            color: #536171;
+            border: 1px solid #eef6ff;
         }
         
         .result-info strong {
@@ -184,10 +194,11 @@
         .file-info {
             margin-top: 10px;
             padding: 10px;
-            background: #f0f0f0;
+            background: #fbfbfc;
             border-radius: 8px;
-            font-size: 14px;
-            color: #666;
+            font-size: 13px;
+            color: #55646f;
+            border: 1px solid #eef3f7;
         }
         
         .loading {
@@ -239,7 +250,7 @@
         
         <div class="upload-area" id="uploadArea">
             <div class="upload-icon">📁</div>
-            <p><strong>คลิกเพื่ือเลือกไฟล์</strong> หรือลากไฟล์มาวางที่นี่</p>
+            <p><strong>คลิกเพื่อเลือกไฟล์</strong> หรือลากไฟล์มาวางที่นี่</p>
             <p class="hint">รองรับไฟล์: JPG, PNG, GIF, BMP, WEBP</p>
         </div>
         
