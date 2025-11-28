@@ -1,0 +1,12 @@
+{
+  "name": "radius-png",
+  "version": "1.0.0",
+  "description": "Remove image corners (rounded) and save as PNG with transparency",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
