@@ -209,6 +209,28 @@
       text-align: center;
       opacity: 0.7;
     }
+
+    .upload-area {
+      border: 2px dashed #E0E0E0;
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #FAFAFA;
+      margin-bottom: 32px;
+    }
+
+    .upload-area:hover {
+      border-color: var(--primary);
+      background: #F0F7FA;
+    }
+
+    .upload-area.dragover {
+      border-color: var(--primary);
+      background: #E6F2F7;
+      transform: scale(1.01);
+    }
   </style>
 </head>
 
@@ -217,8 +239,15 @@
     <h1>Remove Corners — Preview & Download</h1>
     <p class="lead">อัปโหลดรูป (หลายไฟล์ได้) กำหนดค่ามุม (radius) ดูตัวอย่าง แล้วดาวน์โหลดได้ทันที</p>
 
+    <div class="upload-area" id="uploadArea">
+      <div style="font-size: 48px; margin-bottom: 16px;">📁</div>
+      <p style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text);">Click to Upload or Drag & Drop</p>
+      <p style="margin: 8px 0 0; font-size: 13px; color: var(--muted);">Supports: JPG, PNG, WEBP</p>
+    </div>
+
+    <input id="files" type="file" accept="image/*" multiple style="display: none;" />
+
     <div class="controls">
-      <input id="files" type="file" accept="image/*" multiple />
       <label class="row">
         <span style="margin-right:8px">Radius:</span>
         <input id="radius" type="number" value="90" min="0"
@@ -241,8 +270,51 @@
     const gallery = document.getElementById('gallery');
     const downloadAllBtn = document.getElementById('downloadAllBtn');
 
+    const uploadArea = document.getElementById('uploadArea');
+
     let files = [];
-    filesInput.addEventListener('change', e => { files = Array.from(e.target.files); });
+
+    // Handle file selection via input
+    filesInput.addEventListener('change', e => {
+      handleFiles(Array.from(e.target.files));
+    });
+
+    // Handle click on upload area
+    uploadArea.addEventListener('click', () => filesInput.click());
+
+    // Handle drag and drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragover'), false);
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const droppedFiles = Array.from(dt.files);
+      handleFiles(droppedFiles);
+    });
+
+    function handleFiles(newFiles) {
+      files = newFiles;
+      // Optional: Update UI to show selected file count
+      if (files.length > 0) {
+        const text = files.length === 1 ? files[0].name : `${files.length} files selected`;
+        uploadArea.querySelector('p').textContent = text;
+        uploadArea.querySelector('div').textContent = '✅';
+      }
+    }
 
     function loadImageFromFile(file) {
       return new Promise((res, rej) => {
