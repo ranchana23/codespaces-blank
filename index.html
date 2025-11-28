@@ -7,6 +7,7 @@
   <title>Remove Corners — Preview & Download</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai+Looped:wght@300;400;600;700&display=swap"
     rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <style>
     :root {
       --bg: #FDFBF7;
@@ -106,6 +107,10 @@
       font-weight: 500;
       transition: all 0.2s ease;
       box-shadow: 0 4px 12px rgba(174, 198, 207, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
     .btn:hover {
@@ -236,11 +241,11 @@
 
 <body>
   <div class="wrap card">
-    <h1>Remove Corners — Preview & Download</h1>
+    <h1><i class="ph ph-image" style="color: var(--primary);"></i> Remove Corners — Preview & Download</h1>
     <p class="lead">อัปโหลดรูป (หลายไฟล์ได้) กำหนดค่ามุม (radius) ดูตัวอย่าง แล้วดาวน์โหลดได้ทันที</p>
 
     <div class="upload-area" id="uploadArea">
-      <div style="font-size: 48px; margin-bottom: 16px;">📁</div>
+      <i class="ph ph-cloud-arrow-up" style="font-size: 48px; margin-bottom: 16px; color: var(--primary);"></i>
       <p style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text);">Click to Upload or Drag & Drop</p>
       <p style="margin: 8px 0 0; font-size: 13px; color: var(--muted);">Supports: JPG, PNG, WEBP</p>
     </div>
@@ -253,8 +258,8 @@
         <input id="radius" type="number" value="90" min="0"
           style="width:80px;padding:6px;border-radius:6px;border:1px solid #e6eef0" />
       </label>
-      <button id="previewBtn" class="btn small">Preview</button>
-      <button id="downloadAllBtn" class="btn small">Download All (.zip)</button>
+      <button id="previewBtn" class="btn small"><i class="ph ph-eye"></i> Preview</button>
+      <button id="downloadAllBtn" class="btn small"><i class="ph ph-download-simple"></i> Download All (.zip)</button>
     </div>
 
     <div id="gallery" class="gallery" aria-live="polite"></div>
@@ -312,7 +317,9 @@
       if (files.length > 0) {
         const text = files.length === 1 ? files[0].name : `${files.length} files selected`;
         uploadArea.querySelector('p').textContent = text;
-        uploadArea.querySelector('div').textContent = '✅';
+        const icon = uploadArea.querySelector('i');
+        icon.className = 'ph ph-check-circle';
+        icon.style.color = '#4CAF50';
       }
     }
 
