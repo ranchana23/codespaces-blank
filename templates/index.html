@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove Image Corners</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area:hover {
+            background: #eef1ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-area.dragover {
+            background: #e0e7ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .settings {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .result-preview {
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s;
+            text-align: center;
+        }
+
+        /* Constrain preview image so it doesn't overflow the viewport */
+        #resultImg {
+            max-width: 100%;
+            max-height: 60vh; /* keeps preview within viewport height */
+            width: auto;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+            object-fit: contain;
+            background: repeating-conic-gradient(#e0e0e0 0% 25%, white 0% 50%) 50% / 20px 20px;
+            display: inline-block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-info {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .result-info strong {
+            color: #333;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+        
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .success {
+            background: #efe;
+            border: 1px solid #cfc;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Remove Image Corners</h1>
+        <p class="subtitle">ลบมุมภาพและสร้างมุมโค้งมน</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <p><strong>คลิกเพื่ือเลือกไฟล์</strong> หรือลากไฟล์มาวางที่นี่</p>
+            <p class="hint">รองรับไฟล์: JPG, PNG, GIF, BMP, WEBP</p>
+        </div>
+        
+        <input type="file" id="fileInput" accept="image/*" multiple>
+        
+        <div class="file-info" id="fileInfo" style="display: none;"></div>
+        
+        <div class="settings">
+            <label for="radius">มุมโค้ง (Radius):</label>
+            <input type="text" id="radius" value="10%" placeholder="เช่น: 30 (พิกเซล) หรือ 12% (เปอร์เซ็นต์)">
+            <p class="hint">ใช้ตัวเลข (พิกเซล) หรือ % (เปอร์เซ็นต์ของความกว้าง/สูง)</p>
+        </div>
+        
+        <button id="processBtn" disabled>เลือกไฟล์ก่อน</button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #666;">กำลังประมวลผล...</p>
+        </div>
+        
+        <div class="error" id="error"></div>
+        <div class="success" id="success"></div>
+        
+        <div class="result-preview" id="resultPreview">
+            <h3>📸 ตัวอย่างผลลัพธ์</h3>
+            <div class="result-info" id="resultInfo"></div>
+            <div class="gallery" id="gallery" style="margin-top:12px; display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:12px;"></div>
+            <div class="button-group">
+                <button id="downloadBtn" class="btn-primary">💾 ดาวน์โหลดทั้งหมด</button>
+                <button id="newImageBtn" class="btn-secondary">🔄 ภาพใหม่</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const processBtn = document.getElementById('processBtn');
+        const loading = document.getElementById('loading');
+        const errorDiv = document.getElementById('error');
+        const successDiv = document.getElementById('success');
+        const radiusInput = document.getElementById('radius');
+        const resultPreview = document.getElementById('resultPreview');
+        const resultInfo = document.getElementById('resultInfo');
+        const gallery = document.getElementById('gallery');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const newImageBtn = document.getElementById('newImageBtn');
+        
+        let selectedFiles = [];
+        let processedPreviews = [];
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFiles(e.target.files);
+            }
+        });
+
+        function handleFiles(files) {
+            const arr = Array.from(files).filter(f => f.type && f.type.startsWith('image/'));
+            if (arr.length === 0) {
+                showError('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
+                return;
+            }
+
+            selectedFiles = arr;
+
+            // Show file info (count + names)
+            const names = selectedFiles.map(f => f.name).join(', ');
+            const totalKB = (selectedFiles.reduce((s, f) => s + f.size, 0) / 1024).toFixed(2);
+            fileInfo.textContent = `ไฟล์: ${selectedFiles.length} รายการ — ${names} (${totalKB} KB)`;
+            fileInfo.style.display = 'block';
+
+            // Enable preview button
+            processBtn.disabled = false;
+            processBtn.textContent = `Preview (${selectedFiles.length})`;
+
+            hideError();
+            hideSuccess();
+        }
+
+        processBtn.addEventListener('click', async () => {
+            if (!selectedFiles || selectedFiles.length === 0) return;
+
+            const formData = new FormData();
+            selectedFiles.forEach(f => formData.append('file', f));
+            formData.append('radius', radiusInput.value || '10%');
+
+            loading.style.display = 'block';
+            processBtn.disabled = true;
+            hideError();
+            hideSuccess();
+            resultPreview.style.display = 'none';
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'เกิดข้อผิดพลาด');
+                }
+
+                const result = await response.json();
+
+                // Store processed previews
+                processedPreviews = result.previews || [];
+
+                // populate gallery
+                gallery.innerHTML = '';
+                processedPreviews.forEach((item, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'thumb';
+                    div.style.textAlign = 'center';
+                    div.style.padding = '6px';
+                    div.style.background = '#fafafa';
+                    div.style.borderRadius = '8px';
+                    div.innerHTML = `\
+                        <img src="${item.preview}" style="max-width:100%; max-height:140px; border-radius:8px; display:block; margin:0 auto;">\
+                        <div style="font-size:12px; color:#444; margin-top:6px">${item.filename}</div>\
+                        <button class="thumb-download" data-idx="${idx}" style="margin-top:8px; padding:6px 8px; font-size:13px;">ดาวน์โหลด</button>`;
+                    gallery.appendChild(div);
+                });
+
+                // add click handlers for per-thumb download
+                gallery.querySelectorAll('.thumb-download').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        const idx = Number(btn.getAttribute('data-idx'));
+                        const item = processedPreviews[idx];
+                        if (!item) return;
+                        try {
+                            const r = await fetch('/download', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ images: [item] })
+                            });
+                            if (!r.ok) throw new Error('ดาวน์โหลดล้มเหลว');
+                            const blob = await r.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = item.filename || 'image_rounded.png';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+                            showSuccess(`ดาวน์โหลด ${item.filename} เสร็จสิ้น`);
+                        } catch (err) {
+                            showError(err.message || 'ดาวน์โหลดล้มเหลว');
+                        }
+                    });
+                });
+
+                resultInfo.innerHTML = `<strong>รายการ:</strong> ${processedPreviews.length} ภาพ`;
+                resultPreview.style.display = 'block';
+                showSuccess('ประมวลผลเสร็จสิ้น — ดูตัวอย่างด้านล่าง');
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                loading.style.display = 'none';
+                processBtn.disabled = false;
+            }
+        });
+
+        downloadBtn.addEventListener('click', async () => {
+            if (!processedPreviews || processedPreviews.length === 0) return;
+
+            try {
+                // Request server to build a single ZIP and return it
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ images: processedPreviews })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.error || 'เกิดข้อผิดพลาดในการดาวน์โหลด');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'images_rounded.zip';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                showSuccess('ดาวน์โหลด ZIP เริ่มต้นแล้ว — ตรวจสอบโฟลเดอร์ดาวน์โหลด');
+
+            } catch (error) {
+                showError(error.message);
+            }
+        });
+
+        newImageBtn.addEventListener('click', () => {
+            selectedFiles = [];
+            processedPreviews = [];
+            fileInput.value = '';
+            fileInfo.style.display = 'none';
+            resultPreview.style.display = 'none';
+            gallery.innerHTML = '';
+            processBtn.disabled = true;
+            processBtn.textContent = 'เลือกไฟล์ก่อน';
+            hideError();
+            hideSuccess();
+        });
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            errorDiv.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+        }
+
+        function hideSuccess() {
+            successDiv.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
