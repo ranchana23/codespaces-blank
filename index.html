@@ -34,6 +34,83 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 240px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.02);
+    }
+
+    .sidebar-header {
+      padding: 0 24px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-items {
+      padding: 16px 0;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      color: var(--muted);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover {
+      background: #FAFAFA;
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(174, 198, 207, 0.1) 0%, transparent 100%);
+      color: var(--primary);
+      border-left-color: var(--primary);
+    }
+
+    .nav-item i {
+      font-size: 20px;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .page-section {
+      display: none;
+    }
+
+    .page-section.active {
+      display: block;
+    }
+
     .wrap {
       max-width: 900px;
       margin: 40px auto;
@@ -240,44 +317,397 @@
 </head>
 
 <body>
-  <div class="wrap card">
-    <h1><i class="ph ph-image" style="color: var(--primary);"></i> Remove Corners — Preview & Download</h1>
-    <p class="lead">อัปโหลดรูป (หลายไฟล์ได้) กำหนดค่ามุม (radius) ดูตัวอย่าง แล้วดาวน์โหลดได้ทันที</p>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2><i class="ph ph-image" style="color: var(--primary);"></i> Image Tools</h2>
+      </div>
+      <nav class="nav-items">
+        <a class="nav-item active" data-page="radius">
+          <i class="ph ph-corners-in"></i>
+          <span>Radius</span>
+        </a>
+        <a class="nav-item" data-page="autocrop">
+          <i class="ph ph-crop"></i>
+          <span>Auto Crop</span>
+        </a>
+      </nav>
+    </aside>
 
-    <div class="upload-area" id="uploadArea">
-      <i class="ph ph-cloud-arrow-up" style="font-size: 48px; margin-bottom: 16px; color: var(--primary);"></i>
-      <p style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text);">Click to Upload or Drag & Drop</p>
-      <p style="margin: 8px 0 0; font-size: 13px; color: var(--muted);">Supports: JPG, PNG, WEBP</p>
-    </div>
+    <!-- Main Content -->
+    <main class="content">
+      <!-- Radius Page -->
+      <section id="page-radius" class="page-section active">
+        <div class="wrap card">
+          <h1><i class="ph ph-corners-in" style="color: var(--primary);"></i> Remove Corners — Preview & Download</h1>
+          <p class="lead">อัปโหลดรูป (หลายไฟล์ได้) กำหนดค่ามุม (radius) ดูตัวอย่าง แล้วดาวน์โหลดได้ทันที</p>
 
-    <input id="files" type="file" accept="image/*" multiple style="display: none;" />
+          <div class="upload-area" id="uploadArea">
+            <i class="ph ph-cloud-arrow-up" style="font-size: 48px; margin-bottom: 16px; color: var(--primary);"></i>
+            <p style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text);">Click to Upload or Drag & Drop
+            </p>
+            <p style="margin: 8px 0 0; font-size: 13px; color: var(--muted);">Supports: JPG, PNG, WEBP</p>
+          </div>
 
-    <div class="controls">
-      <label class="row">
-        <span style="margin-right:8px">Radius:</span>
-        <input id="radius" type="number" value="90" min="0"
-          style="width:80px;padding:6px;border-radius:6px;border:1px solid #e6eef0" />
-      </label>
-      <button id="previewBtn" class="btn small"><i class="ph ph-eye"></i> Preview</button>
-      <button id="downloadAllBtn" class="btn small"><i class="ph ph-download-simple"></i> Download All (.zip)</button>
-    </div>
+          <input id="files" type="file" accept="image/*" multiple style="display: none;" />
 
-    <div id="gallery" class="gallery" aria-live="polite"></div>
+          <div class="controls">
+            <label class="row">
+              <span style="margin-right:8px">Radius:</span>
+              <input id="radius" type="number" value="90" min="0"
+                style="width:80px;padding:6px;border-radius:6px;border:1px solid #e6eef0" />
+            </label>
+            <button id="previewBtn" class="btn small"><i class="ph ph-eye"></i> Preview</button>
+            <button id="downloadAllBtn" class="btn small"><i class="ph ph-download-simple"></i> Download All
+              (.zip)</button>
+          </div>
 
-    <footer>ไฟล์ที่ได้เป็น PNG โปร่งใส (alpha) — ใช้เบราว์เซอร์ที่รองรับ canvas</footer>
+          <div id="gallery" class="gallery" aria-live="polite"></div>
+
+          <footer>ไฟล์ที่ได้เป็น PNG โปร่งใส (alpha) — ใช้เบราว์เซอร์ที่รองรับ canvas</footer>
+        </div>
+      </section>
+
+      <!-- Auto Crop Page -->
+      <section id="page-autocrop" class="page-section">
+        <div class="wrap card">
+          <h1><i class="ph ph-crop" style="color: var(--secondary);"></i> Auto Crop</h1>
+          <p class="lead">อัปโหลดรูปเพื่อตัดขอบว่างอัตโนมัติ ระบบจะลบพื้นที่โปร่งใสหรือว่างเปล่ารอบๆ รูปให้อัตโนมัติ</p>
+
+          <div class="upload-area" id="uploadAreaAutoCrop">
+            <i class="ph ph-cloud-arrow-up" style="font-size: 48px; margin-bottom: 16px; color: var(--secondary);"></i>
+            <p style="margin: 0; font-size: 16px; font-weight: 600; color: var(--text);">Click to Upload or Drag & Drop
+            </p>
+            <p style="margin: 8px 0 0; font-size: 13px; color: var(--muted);">Supports: JPG, PNG, WEBP</p>
+          </div>
+
+          <input id="filesAutoCrop" type="file" accept="image/*" multiple style="display: none;" />
+
+          <div class="controls">
+            <button id="previewBtnAutoCrop" class="btn small"><i class="ph ph-eye"></i> Preview</button>
+            <button id="downloadAllBtnAutoCrop" class="btn small"><i class="ph ph-download-simple"></i> Download All
+              (.zip)</button>
+          </div>
+
+          <div id="galleryAutoCrop" class="gallery" aria-live="polite"></div>
+
+          <footer>ไฟล์ที่ได้เป็น PNG โปร่งใส (alpha) — ตัดขอบว่างอัตโนมัติ</footer>
+        </div>
+      </section>
+    </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script>
+    // ============================================
+    // URL Routing with History API
+    // ============================================
+
+    const navItems = document.querySelectorAll('.nav-item');
+    const pages = document.querySelectorAll('.page-section');
+
+    // Page configuration
+    const pageConfig = {
+      'radius': {
+        title: 'Remove Corners — Preview & Download',
+        path: '/radius'
+      },
+      'autocrop': {
+        title: 'Auto Crop — Image Tools',
+        path: '/auto_crop'
+      }
+    };
+
+    // Navigate to a specific page
+    function navigateToPage(pageName, shouldPushState = true) {
+      const config = pageConfig[pageName];
+      if (!config) return;
+
+      // Update URL if needed
+      if (shouldPushState) {
+        history.pushState({ page: pageName }, config.title, config.path);
+      }
+
+      // Update page title
+      document.title = config.title;
+
+      // Update active nav item
+      navItems.forEach(nav => {
+        if (nav.getAttribute('data-page') === pageName) {
+          nav.classList.add('active');
+        } else {
+          nav.classList.remove('active');
+        }
+      });
+
+      // Show target page
+      pages.forEach(page => {
+        if (page.id === `page-${pageName}`) {
+          page.classList.add('active');
+        } else {
+          page.classList.remove('active');
+        }
+      });
+    }
+
+    // Get page name from URL path
+    function getPageFromPath(path) {
+      if (path === '/auto_crop') return 'autocrop';
+      if (path === '/radius') return 'radius';
+      return 'radius'; // default
+    }
+
+    // Handle navigation clicks
+    navItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetPage = item.getAttribute('data-page');
+        navigateToPage(targetPage, true);
+      });
+    });
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', (event) => {
+      const pageName = event.state?.page || getPageFromPath(window.location.pathname);
+      navigateToPage(pageName, false);
+    });
+
+    // Initialize on page load
+    const initialPage = getPageFromPath(window.location.pathname);
+    navigateToPage(initialPage, false);
+    // Set initial state
+    history.replaceState({ page: initialPage }, document.title, pageConfig[initialPage].path);
+
+    // ============================================
+    // Radius Page Variables and Logic
+    // ============================================
     const filesInput = document.getElementById('files');
     const previewBtn = document.getElementById('previewBtn');
     const radiusInput = document.getElementById('radius');
     const gallery = document.getElementById('gallery');
     const downloadAllBtn = document.getElementById('downloadAllBtn');
-
     const uploadArea = document.getElementById('uploadArea');
 
     let files = [];
+
+    // Auto Crop Page Elements
+    const filesAutoCropInput = document.getElementById('filesAutoCrop');
+    const uploadAreaAutoCrop = document.getElementById('uploadAreaAutoCrop');
+    const previewBtnAutoCrop = document.getElementById('previewBtnAutoCrop');
+    const downloadAllBtnAutoCrop = document.getElementById('downloadAllBtnAutoCrop');
+    const galleryAutoCrop = document.getElementById('galleryAutoCrop');
+
+    let filesAutoCrop = [];
+
+    // Auto Crop - File handling
+    filesAutoCropInput.addEventListener('change', e => {
+      handleFilesAutoCrop(Array.from(e.target.files));
+    });
+
+    uploadAreaAutoCrop.addEventListener('click', () => filesAutoCropInput.click());
+
+    // Auto Crop - Drag and drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      uploadAreaAutoCrop.addEventListener(eventName, preventDefaultsAutoCrop, false);
+    });
+
+    function preventDefaultsAutoCrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      uploadAreaAutoCrop.addEventListener(eventName, () => uploadAreaAutoCrop.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      uploadAreaAutoCrop.addEventListener(eventName, () => uploadAreaAutoCrop.classList.remove('dragover'), false);
+    });
+
+    uploadAreaAutoCrop.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const droppedFiles = Array.from(dt.files);
+      handleFilesAutoCrop(droppedFiles);
+    });
+
+    function handleFilesAutoCrop(newFiles) {
+      filesAutoCrop = newFiles;
+      if (filesAutoCrop.length > 0) {
+        const text = filesAutoCrop.length === 1 ? filesAutoCrop[0].name : `${filesAutoCrop.length} files selected`;
+        uploadAreaAutoCrop.querySelector('p').textContent = text;
+        const icon = uploadAreaAutoCrop.querySelector('i');
+        icon.className = 'ph ph-check-circle';
+        icon.style.color = '#4CAF50';
+      }
+    }
+
+    // Auto Crop Algorithm - Find content bounds
+    function getAutoCropBounds(canvas) {
+      const ctx = canvas.getContext('2d');
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      const width = canvas.width;
+      const height = canvas.height;
+
+      let minX = width;
+      let minY = height;
+      let maxX = 0;
+      let maxY = 0;
+
+      // Scan all pixels to find non-transparent boundaries
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const alpha = data[(y * width + x) * 4 + 3];
+          if (alpha > 0) { // Non-transparent pixel
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+
+      // If no content found, return original dimensions
+      if (minX > maxX || minY > maxY) {
+        return { x: 0, y: 0, width: width, height: height };
+      }
+
+      return {
+        x: minX,
+        y: minY,
+        width: maxX - minX + 1,
+        height: maxY - minY + 1
+      };
+    }
+
+    // Auto Crop - Apply crop to image
+    function autoCropCanvas(img) {
+      // First, draw image on temp canvas
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = img.width;
+      tempCanvas.height = img.height;
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCtx.drawImage(img, 0, 0);
+
+      // Get crop bounds
+      const bounds = getAutoCropBounds(tempCanvas);
+
+      // Create cropped canvas
+      const croppedCanvas = document.createElement('canvas');
+      croppedCanvas.width = bounds.width;
+      croppedCanvas.height = bounds.height;
+      const croppedCtx = croppedCanvas.getContext('2d');
+
+      // Draw cropped portion
+      croppedCtx.drawImage(
+        tempCanvas,
+        bounds.x, bounds.y, bounds.width, bounds.height,
+        0, 0, bounds.width, bounds.height
+      );
+
+      return croppedCanvas;
+    }
+
+    async function makeAutoCropForFile(file) {
+      const img = await loadImageFromFile(file);
+      const canvas = autoCropCanvas(img);
+      return new Promise(resolve => canvas.toBlob(blob => resolve({
+        blob,
+        width: canvas.width,
+        height: canvas.height
+      }), 'image/png'));
+    }
+
+    function clearGalleryAutoCrop() {
+      galleryAutoCrop.innerHTML = '';
+    }
+
+    // Preview button handler
+    previewBtnAutoCrop.addEventListener('click', async () => {
+      if (!filesAutoCrop.length) return alert('กรุณาเลือกไฟล์ก่อน');
+      clearGalleryAutoCrop();
+
+      for (const f of filesAutoCrop) {
+        const holder = document.createElement('div');
+        holder.className = 'thumb';
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = f.name;
+        const imgEl = document.createElement('img');
+        imgEl.alt = f.name;
+        holder.appendChild(imgEl);
+        galleryAutoCrop.appendChild(holder);
+
+        try {
+          const { blob, width, height } = await makeAutoCropForFile(f);
+          const url = URL.createObjectURL(blob);
+          imgEl.src = url;
+          const m = document.createElement('div');
+          m.className = 'meta';
+          m.textContent = `${width}×${height}`;
+          holder.appendChild(m);
+
+          const actions = document.createElement('div');
+          actions.className = 'actions';
+          const dl = document.createElement('button');
+          dl.className = 'btn secondary small';
+          dl.textContent = 'Download';
+          dl.addEventListener('click', () => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = f.name.replace(/\.[^.]+$/, '') + '_cropped.png';
+            a.click();
+          });
+          actions.appendChild(dl);
+          holder.appendChild(actions);
+
+          // Store blob for zip
+          holder._blob = blob;
+          holder._name = f.name;
+        } catch (err) {
+          const e = document.createElement('div');
+          e.textContent = 'ไม่สามารถแสดงภาพนี้ได้';
+          e.style.color = 'crimson';
+          holder.appendChild(e);
+        }
+      }
+    });
+
+    // Download all button handler
+    downloadAllBtnAutoCrop.addEventListener('click', async () => {
+      if (!galleryAutoCrop.children.length) return alert('ไม่มีภาพที่จะดาวน์โหลด — คลิก Preview ก่อน');
+      const zip = new JSZip();
+      let added = 0;
+
+      for (const child of Array.from(galleryAutoCrop.children)) {
+        const blob = child._blob;
+        const name = child._name || ('image' + (added + 1));
+        if (blob) {
+          zip.file(name.replace(/\.[^.]+$/, '') + '_cropped.png', blob);
+          added++;
+        }
+      }
+
+      if (!added) return alert('ไม่มีไฟล์ถูกเตรียมไว้');
+      downloadAllBtnAutoCrop.textContent = 'Preparing...';
+      downloadAllBtnAutoCrop.disabled = true;
+      const zblob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zblob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'cropped_images.zip';
+      a.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+        downloadAllBtnAutoCrop.textContent = 'Download All (.zip)';
+        downloadAllBtnAutoCrop.disabled = false;
+      }, 1500);
+    });
+
+    // ============================================
+    // Radius Page Logic
+    // ============================================
 
     // Handle file selection via input
     filesInput.addEventListener('change', e => {
