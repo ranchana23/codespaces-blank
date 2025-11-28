@@ -1,28 +1,30 @@
-# remove_corners
+# Radius PNG
 
-Small Python utility to remove (round) the corners of an image and save it as a PNG with transparency.
+A simple, beautiful web tool to round image corners directly in your browser.
 
-Usage
+## Features
+- 🖼️ **Client-side Processing**: Fast and secure, images never leave your device.
+- 📦 **Bulk Support**: Process multiple images at once.
+- 💾 **ZIP Download**: Download all processed images in a single ZIP file.
+- 🎨 **Minimal Pastel UI**: Clean and easy to use interface.
 
-Install requirements:
+## Usage
 
-```bash
-pip install -r requirements.txt
-```
+### Run Locally
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Start the server:
+   ```bash
+   npm start
+   ```
+3. Open `http://localhost:3000`.
 
-Basic commands:
+### GitHub Pages
+This project is ready for GitHub Pages.
+1. Push to GitHub.
+2. Enable GitHub Pages for the **root** directory.
 
-```bash
-# Default: 10% corner radius
-python remove_corners.py input.jpg
-
-# Specify output and pixel radius
-python remove_corners.py input.jpg output.png --radius 30
-
-# Use percent for radius (e.g. 12% of min(width,height))
-python remove_corners.py input.jpg output.png --radius 12%
-```
-
-Output
-
-The script writes a PNG with transparent rounded corners. If you don't provide an output path, it will save next to the input file with the `.png` extension.
+## Legacy
+The original Python CLI version has been moved to the `backup/` directory.
